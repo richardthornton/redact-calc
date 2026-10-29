@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        dependency-type: development
+    # Redact is pre-1.0 and moves fast; review its bumps on their own.
+    ignore:
+      - dependency-name: '@tanstack/redact'
+        update-types: ['version-update:semver-patch']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

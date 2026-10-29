@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars*
+.env*
+.playwright-mcp/
+*.log
+.DS_Store

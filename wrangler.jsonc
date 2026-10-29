@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "redact-calc",
+  "compatibility_date": "2026-10-28",
+  // Assets-only Worker: no server code, Cloudflare serves ./dist from the edge.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  // Serve only on the custom domain. Wrangler creates the proxied DNS record
+  // and certificate for it, as long as the zone lives in this Cloudflare account.
+  "routes": [{ "pattern": "calc.richardthornton.com", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true }
+}

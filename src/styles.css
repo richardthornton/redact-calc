@@ -1,0 +1,429 @@
+/* Paper, ink and one stamp of red. */
+:root {
+  color-scheme: light dark;
+  --paper: #efebe2;
+  --card: #fbf9f4;
+  --ink: #161513;
+  --ink-2: #6b675e;
+  --ink-3: #a19c90;
+  --line: rgb(22 21 19 / 0.09);
+  --key: #f3f0e8;
+  --key-fn: #e6e1d5;
+  --key-op: #161513;
+  --key-op-ink: #fbf9f4;
+  --stamp: #d63f27;
+  --stamp-ink: #fff8f2;
+  --shadow: 0 1px 0 rgb(255 255 255 / 0.9) inset, 0 -1px 0 rgb(22 21 19 / 0.06) inset, 0 1px 2px rgb(22 21 19 / 0.06);
+  --card-shadow: 0 1px 0 rgb(255 255 255 / 0.8) inset, 0 30px 60px -20px rgb(60 48 30 / 0.25), 0 12px 24px -12px rgb(60 48 30 / 0.18);
+  --grain-opacity: 0.35;
+
+  --font-ui: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-num: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+  --radius: 28px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0c0c0b;
+    --card: #151513;
+    --ink: #f1ede4;
+    --ink-2: #8f8a80;
+    --ink-3: #57544d;
+    --line: rgb(241 237 228 / 0.07);
+    --key: #1e1d1a;
+    --key-fn: #2a2925;
+    --key-op: #f1ede4;
+    --key-op-ink: #151513;
+    --stamp: #ff5b3d;
+    --stamp-ink: #1a0b07;
+    --shadow: 0 1px 0 rgb(255 255 255 / 0.05) inset, 0 -1px 0 rgb(0 0 0 / 0.3) inset, 0 1px 2px rgb(0 0 0 / 0.3);
+    --card-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 30px 80px -20px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(255 255 255 / 0.03);
+    --grain-opacity: 0.18;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-feature-settings: 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Fine paper grain, generated rather than downloaded. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.35 0 0 0 0 0.3 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  body::before {
+    mix-blend-mode: screen;
+  }
+}
+
+.shell {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+}
+
+.calc {
+  width: min(100%, 372px);
+  padding: 14px;
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--line);
+  animation: rise 700ms var(--ease) both;
+}
+
+/* ---------- header ---------- */
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 0 8px;
+}
+
+.brand {
+  font-family: var(--font-num);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+
+.slash {
+  color: var(--ink-3);
+  margin: 0 1px;
+}
+
+/* The word is literally redacted until you hover it. */
+.redacted {
+  position: relative;
+  color: transparent;
+  border-radius: 2px;
+  background: var(--ink);
+  transition:
+    color 300ms var(--ease),
+    background-color 300ms var(--ease);
+  cursor: default;
+}
+
+.redacted:hover {
+  color: var(--ink);
+  background: transparent;
+}
+
+.chip {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--stamp);
+  opacity: 0;
+  transform: translateY(2px);
+  transition:
+    opacity 200ms var(--ease),
+    transform 200ms var(--ease);
+}
+
+.chip--on {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- display ---------- */
+
+.display {
+  all: unset;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 6px;
+  min-height: 148px;
+  margin: 6px 0 14px;
+  padding: 12px 10px 6px;
+  overflow: hidden;
+  border-radius: 18px;
+  text-align: right;
+  container-type: inline-size;
+  cursor: copy;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.display:disabled {
+  cursor: default;
+}
+
+.display:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 2px;
+}
+
+.sub {
+  min-height: 1.4em;
+  max-width: 100%;
+  font-family: var(--font-num);
+  font-size: 15px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Overflow trims the start of a long expression, keeping the newest input visible. */
+  direction: rtl;
+}
+
+.sub > span {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.main {
+  display: block;
+  max-width: 100%;
+  font-family: var(--font-num);
+  font-weight: 350;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  /* Geist Mono glyphs are ~0.6em wide: shrink to fit, then wrap as a last resort. */
+  font-size: max(1.5rem, min(4.5rem, calc(100cqi * 1.62 / var(--chars, 1))));
+  overflow-wrap: anywhere;
+  transition: font-size 160ms var(--ease);
+}
+
+.display--result .main {
+  font-weight: 450;
+  animation: settle 380ms var(--ease) both;
+}
+
+.display--error .main {
+  font-family: var(--font-ui);
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--stamp);
+}
+
+/* A marker stroke sweeps across the display on clear. */
+.wipe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  height: 52px;
+  border-radius: 3px;
+  background: var(--ink);
+  transform-origin: left center;
+  animation: wipe 520ms var(--ease) forwards;
+  pointer-events: none;
+}
+
+/* ---------- keys ---------- */
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.key {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  aspect-ratio: 1 / 0.84;
+  border-radius: 18px;
+  background: var(--key);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 450;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform 140ms var(--ease),
+    background-color 180ms var(--ease),
+    color 180ms var(--ease),
+    filter 180ms var(--ease);
+}
+
+.key:hover {
+  filter: brightness(0.97);
+}
+
+@media (prefers-color-scheme: dark) {
+  .key:hover {
+    filter: brightness(1.15);
+  }
+}
+
+.key:active,
+.key[data-active] {
+  transform: scale(0.94);
+  transition-duration: 60ms;
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 2px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.key--fn {
+  background: var(--key-fn);
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.key--op {
+  background: var(--key-op);
+  color: var(--key-op-ink);
+  font-size: 28px;
+  font-weight: 350;
+}
+
+.key--op[aria-pressed='true'] {
+  background: var(--card);
+  color: var(--stamp);
+  box-shadow: inset 0 0 0 2px var(--stamp);
+}
+
+.key--eq {
+  background: var(--stamp);
+  color: var(--stamp-ink);
+  font-size: 30px;
+  font-weight: 350;
+}
+
+/* ---------- footer ---------- */
+
+.foot {
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  animation: fade 900ms 250ms var(--ease) both;
+}
+
+.foot p {
+  margin: 0;
+}
+
+.foot a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--stamp);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.foot a:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+kbd {
+  font-family: var(--font-num);
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+
+@media (hover: none) {
+  .foot p:first-child {
+    display: none;
+  }
+}
+
+/* ---------- motion ---------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0.2;
+    transform: translateY(8px);
+    filter: blur(3px);
+  }
+}
+
+@keyframes wipe {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  45% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
